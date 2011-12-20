@@ -85,7 +85,9 @@ public class ToGerritRunListener extends RunListener<AbstractBuild> {
         if (cause != null) {
             cleanUpGerritCauses(cause, r);
             PatchsetCreated event = cause.getEvent();
-            GerritTrigger.getTrigger(r.getProject()).notifyBuildEnded(event);
+            if (r != null && GerritTrigger.getTrigger(r.getProject()) != null) {
+                GerritTrigger.getTrigger(r.getProject()).notifyBuildEnded(event);
+            }
             event.fireBuildCompleted(r);
             if (!cause.isSilentMode()) {
                 PatchSetKey key = memory.completed(event, r);
