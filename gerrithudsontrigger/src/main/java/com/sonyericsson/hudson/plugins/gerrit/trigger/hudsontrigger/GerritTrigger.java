@@ -28,6 +28,8 @@ import com.sonyericsson.hudson.plugins.gerrit.gerritevents.GerritEventListener;
 import com.sonyericsson.hudson.plugins.gerrit.gerritevents.GerritQueryHandler;
 import com.sonyericsson.hudson.plugins.gerrit.gerritevents.dto.GerritEvent;
 import com.sonyericsson.hudson.plugins.gerrit.gerritevents.dto.attr.Approval;
+import com.sonyericsson.hudson.plugins.gerrit.gerritevents.dto.attr.RefUpdate;
+import com.sonyericsson.hudson.plugins.gerrit.gerritevents.dto.events.AutoRebuildPatchset;
 import com.sonyericsson.hudson.plugins.gerrit.gerritevents.dto.events.ChangeAbandoned;
 import com.sonyericsson.hudson.plugins.gerrit.gerritevents.dto.events.ChangeBasedEvent;
 import com.sonyericsson.hudson.plugins.gerrit.gerritevents.dto.events.ChangeMerged;
@@ -40,6 +42,7 @@ import com.sonyericsson.hudson.plugins.gerrit.gerritevents.dto.events.RefUpdated
 import com.sonyericsson.hudson.plugins.gerrit.trigger.Messages;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.PluginImpl;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.VerdictCategory;
+import com.sonyericsson.hudson.plugins.gerrit.trigger.config.IGerritHudsonTriggerConfig;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.gerritnotifier.ToGerritRunListener;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.actions.GerritTriggerInformationAction;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.actions.RetriggerAction;
@@ -72,6 +75,7 @@ import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import net.sf.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.slf4j.Logger;
@@ -338,6 +342,8 @@ public class GerritTrigger extends Trigger<AbstractProject> implements GerritEve
             GerritCause cause;
             if (event instanceof ManualPatchsetCreated) {
                 cause = new GerritManualCause((ManualPatchsetCreated)event, silentMode);
+            } else if (event instanceof AutoRebuildPatchset) {
+                cause = new GerritAutoRebuildCause((AutoRebuildPatchset)event, silentMode);
             } else {
                 cause = new GerritCause(event, silentMode);
             }
@@ -616,6 +622,24 @@ public class GerritTrigger extends Trigger<AbstractProject> implements GerritEve
     }
 
     /**
+     * Should branch be rebuild or not?
+     *
+     * @param ref git-ref update info
+     * @return true if open changes on this branch should be rebuild.
+     */
+    private boolean isInterestingForAutorebuild(RefUpdate ref) {
+        if (gerritProjects == null) {
+            return false;
+        }
+        for (GerritProject project : gerritProjects) {
+            if (project.isAutoRebuildEnabled(ref.getProject(), ref.getRefName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Should we trigger on this event?
      *
      * @param event the event
@@ -657,6 +681,11 @@ public class GerritTrigger extends Trigger<AbstractProject> implements GerritEve
                     RefUpdated refUpdated = (RefUpdated)event;
                     if (p.isInteresting(refUpdated.getRefUpdate().getProject(),
                             refUpdated.getRefUpdate().getRefName())) {
+                        logger.trace("According to {} the event is interesting.", p);
+                        return true;
+                    }
+                    if (p.isAutoRebuildEnabled(event.getRefUpdate().getProject(),
+                            event.getRefUpdate().getRefName())) {
                         logger.trace("According to {} the event is interesting.", p);
                         return true;
                     }
@@ -764,13 +793,41 @@ public class GerritTrigger extends Trigger<AbstractProject> implements GerritEve
             logger.trace("Disabled.");
             return;
         }
-        if (isInteresting(event)) {
+        if (!isInteresting(event)) {
+            return;
+        }
+        if (triggerOnRefUpdatedEvent) {
             logger.trace("The event is interesting.");
             if (!silentMode) {
                 ToGerritRunListener.getInstance().onTriggered(myProject, event);
             }
             GerritCause cause = new GerritCause(event, silentMode);
             schedule(cause, event);
+        }
+        if (!isInterestingForAutorebuild(event.getRefUpdate())) {
+            return;
+        }
+        StringBuilder queryBuilder = new StringBuilder();
+        queryBuilder.append("project:");
+        queryBuilder.append(event.getRefUpdate().getProject());
+        queryBuilder.append(" branch:");
+        queryBuilder.append(event.getRefUpdate().getRefName());
+        queryBuilder.append(" status:open");
+        String queryString = queryBuilder.toString();
+        IGerritHudsonTriggerConfig config = PluginImpl.getInstance().getConfig();
+        GerritQueryHandler handler = new GerritQueryHandler(config);
+        try {
+            List<JSONObject> json = handler.queryJava(queryString, false, true, false);
+            for (JSONObject res : json) {
+                AutoRebuildPatchset rebuildEvent = new AutoRebuildPatchset(
+                    res,
+                    res.getJSONObject("currentPatchSet"),
+                    event
+                );
+                gerritEvent(rebuildEvent);
+            }
+        } catch (Exception e) {
+            logger.error("Can't receive patchsets to rebuild", e);
         }
     }
 
