@@ -180,7 +180,7 @@ public final class GerritDynamicUrlProcessor {
           if (branches == null) {
             throw new ParseException("Line " + lineNr + ": attempt to use 'Branch' before 'Project'", lineNr);
           }
-          Branch branch = new Branch(type, text);
+          Branch branch = new Branch(type, text, rebuildFlag);
           branches.add(branch);
           dynamicGerritProject.setBranches(branches);
         } else if (SHORTNAME_TOPIC.equals(item)) { // Topic
