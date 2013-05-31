@@ -70,7 +70,7 @@ public class GerritProjectWithFilesInterestingTest {
         List<InterestingScenarioWithFiles[]> parameters = new LinkedList<InterestingScenarioWithFiles[]>();
 
         List<Branch> branches = new LinkedList<Branch>();
-        Branch branch = new Branch(CompareType.PLAIN, "master");
+        Branch branch = new Branch(CompareType.PLAIN, "master", false);
         branches.add(branch);
         List<Topic> topics = new LinkedList<Topic>();
         List<FilePath> filePaths = new LinkedList<FilePath>();
@@ -83,7 +83,7 @@ public class GerritProjectWithFilesInterestingTest {
                 config, "project", "master", null, files, true), });
 
         branches = new LinkedList<Branch>();
-        branch = new Branch(CompareType.REG_EXP, "feature/.*master");
+        branch = new Branch(CompareType.REG_EXP, "feature/.*master", false);
         branches.add(branch);
         filePaths = new LinkedList<FilePath>();
         filePath = new FilePath(CompareType.REG_EXP, "tests/.*");
@@ -95,7 +95,7 @@ public class GerritProjectWithFilesInterestingTest {
                 config, "projectNumber5", "feature/mymaster", null, files, true), });
 
         branches = new LinkedList<Branch>();
-        branch = new Branch(CompareType.ANT, "**/master");
+        branch = new Branch(CompareType.ANT, "**/master", false);
         branches.add(branch);
         filePaths = new LinkedList<FilePath>();
         filePath = new FilePath(CompareType.ANT, "**/*test*");
@@ -107,7 +107,7 @@ public class GerritProjectWithFilesInterestingTest {
                 config, "vendor/semc/master/project", "origin/master", null, files, true), });
 
         branches = new LinkedList<Branch>();
-        branch = new Branch(CompareType.REG_EXP, "feature/.*master");
+        branch = new Branch(CompareType.REG_EXP, "feature/.*master", false);
         branches.add(branch);
         filePaths = new LinkedList<FilePath>();
         filePath = new FilePath(CompareType.REG_EXP, "tests/.*");
