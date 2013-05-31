@@ -77,6 +77,8 @@ public final class GerritDynamicUrlProcessor {
       // leading and trailing whitespace have been removed:
       // item: one of the characters p (for Project), b (for Branch), t (for Topic) or f (for FilePath)
       // optional whitespace
+      // auto rebuild flag: +
+      // optional whitespace
       // operator: one of the characters = (for Plain), ~ (for RegExp), or ^ (for ANT path)
       // optional whitespace
       // the pattern: everything else on the line
@@ -86,6 +88,7 @@ public final class GerritDynamicUrlProcessor {
               + "|" + SHORTNAME_TOPIC
               + "|" + SHORTNAME_FILE
               + ")";
+      String autoRebuildFlag = "(\\+{0,1})";
       String operators = "(";
       boolean firstoperator = true;
       for (CompareType type : CompareType.values()) {
@@ -98,6 +101,8 @@ public final class GerritDynamicUrlProcessor {
       operators += ")";
 
       return Pattern.compile(projectBranchFile
+              + "\\s*"
+              + autoRebuildFlag
               + "\\s*"
               + operators
               + "\\s*(.+)$");
@@ -150,10 +155,11 @@ public final class GerritDynamicUrlProcessor {
           throw new ParseException("Line " + lineNr + ": cannot parse '" + line + "'", lineNr);
         }
 
-        // CS IGNORE MagicNumber FOR NEXT 3 LINES. REASON: ConstantsNotNeeded
+        // CS IGNORE MagicNumber FOR NEXT 4 LINES. REASON: ConstantsNotNeeded
         String item = matcher.group(1);
-        String oper = matcher.group(2);
-        String text = matcher.group(3);
+        boolean rebuildFlag = !matcher.group(2).isEmpty();
+        String oper = matcher.group(3);
+        String text = matcher.group(4);
         if (item == null || oper == null || text == null) {
           throw new ParseException("Line " + lineNr + ": cannot parse '" + line + "'", lineNr);
         }
