@@ -116,7 +116,7 @@ public class GerritProjectInterestingTest {
                 "vendor/semc/master/project", "origin/master", null, true), });
 
         branches = new LinkedList<Branch>();
-        branch = new Branch(CompareType.PLAIN, "master");
+        branch = new Branch(CompareType.PLAIN, "master", false);
         branches.add(branch);
         topics = new LinkedList<Topic>();
         Topic topic = new Topic(CompareType.PLAIN, "topic");

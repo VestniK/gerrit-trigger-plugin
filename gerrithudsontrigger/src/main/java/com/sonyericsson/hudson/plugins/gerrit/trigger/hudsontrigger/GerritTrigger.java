@@ -25,6 +25,7 @@
 package com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger;
 
 import static com.sonyericsson.hudson.plugins.gerrit.gerritevents.GerritDefaultValues.DEFAULT_BUILD_SCHEDULE_DELAY;
+import com.sonyericsson.hudson.plugins.gerrit.gerritevents.GerritConnectionConfig2;
 import com.sonyericsson.hudson.plugins.gerrit.gerritevents.GerritEventListener;
 import com.sonyericsson.hudson.plugins.gerrit.gerritevents.GerritHandler;
 import com.sonyericsson.hudson.plugins.gerrit.gerritevents.GerritQueryHandler;
@@ -1046,7 +1047,7 @@ public class GerritTrigger extends Trigger<AbstractProject> implements GerritEve
             queryBuilder.append(event.getRefUpdate().getRefName());
             queryBuilder.append(" status:open");
             String queryString = queryBuilder.toString();
-            IGerritHudsonTriggerConfig config = PluginImpl.getInstance().getConfig();
+            GerritConnectionConfig2 config = PluginImpl.getInstance().getFirstServer().getConfig();
             GerritQueryHandler handler = new GerritQueryHandler(config);
             try {
                 List<JSONObject> json = handler.queryJava(queryString, false, true, false);

@@ -48,25 +48,25 @@ public class GerritProjectAutorebuildTest {
         List<Branch> branches = new LinkedList<Branch>();
         Branch branch = new Branch(CompareType.PLAIN, "master", true);
         branches.add(branch);
-        GerritProject config = new GerritProject(CompareType.PLAIN, "project", branches, null);
+        GerritProject config = new GerritProject(CompareType.PLAIN, "project", branches, null, null);
         parameters.add(new InterestingScenario[]{new InterestingScenario(config, "project", "master", true)});
 
         branches = new LinkedList<Branch>();
         branch = new Branch(CompareType.PLAIN, "master", false);
         branches.add(branch);
-        config = new GerritProject(CompareType.PLAIN, "project", branches, null);
+        config = new GerritProject(CompareType.PLAIN, "project", branches, null, null);
         parameters.add(new InterestingScenario[]{new InterestingScenario(config, "project", "master", false)});
 
         branches = new LinkedList<Branch>();
         branch = new Branch(CompareType.ANT, "**/master", true);
         branches.add(branch);
-        config = new GerritProject(CompareType.PLAIN, "project", branches, null);
+        config = new GerritProject(CompareType.PLAIN, "project", branches, null, null);
         parameters.add(new InterestingScenario[]{new InterestingScenario(config, "project", "origin/master", true)});
 
         branches = new LinkedList<Branch>();
         branch = new Branch(CompareType.ANT, "**/master", false);
         branches.add(branch);
-        config = new GerritProject(CompareType.PLAIN, "project", branches, null);
+        config = new GerritProject(CompareType.PLAIN, "project", branches, null, null);
         parameters.add(new InterestingScenario[]{new InterestingScenario(config, "project", "origin/master", false)});
 
         branches = new LinkedList<Branch>();
@@ -74,7 +74,7 @@ public class GerritProjectAutorebuildTest {
         branches.add(branch);
         branch = new Branch(CompareType.PLAIN, "feature", false);
         branches.add(branch);
-        config = new GerritProject(CompareType.PLAIN, "project", branches, null);
+        config = new GerritProject(CompareType.PLAIN, "project", branches, null, null);
         parameters.add(new InterestingScenario[]{new InterestingScenario(config, "project", "master", true)});
         parameters.add(new InterestingScenario[]{new InterestingScenario(config, "project", "feature/master", true)});
         parameters.add(new InterestingScenario[]{new InterestingScenario(config, "project", "feature", false)});

@@ -1046,7 +1046,7 @@ public class GerritTriggerTest {
         when(project.isBuildable()).thenReturn(true);
 
         GerritProject gP = mock(GerritProject.class);
-        doReturn(true).when(gP).isInteresting(any(String.class), any(String.class));
+        doReturn(true).when(gP).isInteresting(any(String.class), any(String.class), any(String.class));
         when(gP.getFilePaths()).thenReturn(null);
 
         GerritTrigger trigger = Setup.createDefaultTrigger(null);
@@ -1161,7 +1161,7 @@ public class GerritTriggerTest {
         when(project.isBuildable()).thenReturn(true);
 
         GerritProject gP = mock(GerritProject.class);
-        doReturn(true).when(gP).isInteresting(any(String.class), any(String.class));
+        doReturn(true).when(gP).isInteresting(any(String.class), any(String.class), any(String.class));
         when(gP.getFilePaths()).thenReturn(null);
 
         GerritTrigger trigger = Setup.createDefaultTrigger(null);

@@ -78,7 +78,7 @@ public class BuildCompletedRestCommandJobHudsonTest extends HudsonTestCase {
         GerritTrigger trigger = Setup.createDefaultTrigger(project);
         trigger.setGerritProjects(Collections.singletonList(
                 new GerritProject(CompareType.PLAIN, event.getChange().getProject(),
-                        Collections.singletonList(new Branch(CompareType.PLAIN, event.getChange().getBranch())),
+                        Collections.singletonList(new Branch(CompareType.PLAIN, event.getChange().getBranch(), false)),
                         null, null)
         ));
         trigger.setSilentMode(false);
